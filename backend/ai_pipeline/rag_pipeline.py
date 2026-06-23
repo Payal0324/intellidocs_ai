@@ -2,6 +2,10 @@
 import google.generativeai as genai
 import os
 import re
+import streamlit as st
+
+api_key = st.secrets["AQ.Ab8RN6I-SIYFRaJG9laDGwC43ewhVawbfepF_knJKyf1nxUK_g"]
+genai.configure(api_key=api_key)
 
 class RAGPipeline:
     def __init__(self):
