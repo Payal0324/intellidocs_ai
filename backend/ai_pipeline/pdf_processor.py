@@ -22,9 +22,7 @@ class PDFProcessor:
 
     def clean_text(self, text: str) -> str:
         # Remove multiple newlines and excessive whitespace
-        text = re.sub(r'
-+', '
-', text)
+        text = re.sub(r'\n+', '\n', text)
         text = re.sub(r'\s+', ' ', text).strip()
         return text
 
