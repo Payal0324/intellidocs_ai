@@ -24,6 +24,36 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+st.markdown("""
+<style>
+
+[data-testid="stSidebar"]{
+background:#161B22;
+}
+
+[data-testid="stSidebar"] *{
+color:white;
+}
+
+.stApp{
+background:#F8FAFC;
+}
+
+div[data-testid="metric-container"]{
+background:white;
+border-radius:12px;
+padding:15px;
+box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+
+.stButton button{
+border-radius:10px;
+font-weight:600;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
 # Custom CSS for a modern, premium UI/UX
 st.markdown(
     """
@@ -254,11 +284,21 @@ summarizer = get_summarizer() # Get the summarizer instance
 
 
 # Header Section
-st.markdown('<div class="header-container">', unsafe_allow_html=True)
-st.title("IntelliDocs AI")
-st.write("Your intelligent document interaction system.")
-st.info("System Status: Operational") # Placeholder for a dynamic status indicator
-st.markdown('</div>', unsafe_allow_html=True)
+st.markdown("""
+<div style="
+padding:15px;
+border-radius:12px;
+background:#0E1117;
+margin-bottom:20px;
+">
+<h1 style="color:white;margin-bottom:0;">
+🧠 IntelliDocs AI
+</h1>
+<p style="color:#A0AEC0;margin-top:5px;">
+Intelligent Multi-PDF Conversational Knowledge Assistant
+</p>
+</div>
+""", unsafe_allow_html=True)
 
 # Initialize session state for navigation
 if 'current_page' not in st.session_state:
@@ -266,77 +306,112 @@ if 'current_page' not in st.session_state:
 
 # Sidebar Navigation
 with st.sidebar:
-    st.image("https://i.imgur.com/your-logo.png", use_column_width=True) # Placeholder for logo
-    st.markdown("## Navigation")
 
-    pages = {
-        "Dashboard": "🏠",
-        "Chat with PDFs": "💬",
-        "Document Summary": "📝",
-        "Chat History": "🕰️",
-        "Uploaded Documents": "📂",
-        "Settings": "⚙️",
-        "About Project": "ℹ️"
-    }
-
+    st.markdown("""
+    # 🧠 IntelliDocs AI
+    ### Knowledge Assistant
+    ---
+    """)
+    
     selected_page = st.radio(
-        "Go to",
-        list(pages.keys()),
-        format_func=lambda page_name: f"{pages[page_name]} {page_name}",
-        key="sidebar_radio"
+        "",
+        [
+            "💬 AI Chat",
+            "📂 Documents",
+            "📄 Summaries",
+            "🕒 History",
+            "📊 Dashboard",
+            "ℹ️ About"
+        ]
     )
 
-    if selected_page:
-        st.session_state.current_page = selected_page
+    page_mapping = {
+        "💬 AI Chat": "Chat with PDFs",
+        "📂 Documents": "Uploaded Documents",
+        "📄 Summaries": "Document Summary",
+        "🕒 History": "Chat History",
+        "📊 Dashboard": "Dashboard",
+        "ℹ️ About": "About Project"
+    }
+
+    st.session_state.current_page = page_mapping[selected_page]
 
 # Main Content Area based on selected page
 st.markdown("<br>", unsafe_allow_html=True)
 
 # Function for Dashboard
 def show_dashboard():
-    st.subheader("Dashboard Overview")
-    st.write("Welcome to your IntelliDocs AI Dashboard. Here you will find key metrics and quick actions.")
 
-    st.markdown("### Key Metrics")
-    col1, col2, col3, col4 = st.columns(4)
+    st.title("📊 Dashboard")
+
+    docs = db_manager.get_all_documents()
+
+    total_docs = len(docs)
+
+    total_pages = sum(
+        doc.num_pages or 0
+        for doc in docs
+    )
+
+    total_chats = 0
+
+    if "session_id" in st.session_state:
+        total_chats = len(
+            db_manager.get_chat_history(
+                st.session_state.session_id
+            )
+        )
+
+    col1,col2,col3 = st.columns(3)
 
     with col1:
-        st.metric(label="Total Uploaded PDFs", value="0") # Placeholder
+        st.metric(
+            "Documents",
+            total_docs
+        )
+
     with col2:
-        st.metric(label="Total Pages Processed", value="0") # Placeholder
+        st.metric(
+            "Pages Indexed",
+            total_pages
+        )
+
     with col3:
-        st.metric(label="Number of Chats", value="0") # Placeholder
-    with col4:
-        st.metric(label="Number of Summaries Generated", value="0") # Placeholder
+        st.metric(
+            "Questions Asked",
+            total_chats
+        )
 
-    st.markdown("### Feature Highlights")
-    st.markdown("""
-    - **Intelligent PDF Interaction**: Ask questions and get answers directly from your documents.
-    - **Contextual Chat History**: Maintain conversation context across sessions.
-    - **Automated Summarization**: Quickly grasp the essence of lengthy documents.
-    - **Secure Document Management**: Easily upload, view, and delete your PDF files.
-    - **Personalized Settings**: Customize your experience with various application settings.
-    """)
+    st.markdown("---")
 
-    st.markdown("### Quick Actions")
-    col_qa1, col_qa2, col_qa3 = st.columns(3)
-    with col_qa1:
-        if st.button("Upload New PDF", use_container_width=True):
-            st.session_state.current_page = "Uploaded Documents"
-            st.rerun()
-    with col_qa2:
-        if st.button("Start Chat", use_container_width=True):
-            st.session_state.current_page = "Chat with PDFs"
-            st.rerun()
-    with col_qa3:
-        if st.button("View Documents", use_container_width=True):
-            st.session_state.current_page = "Uploaded Documents"
-            st.rerun()
+    st.subheader("📂 Recent Documents")
+
+    if docs:
+
+        for doc in docs[-5:]:
+
+            with st.container(border=True):
+
+                st.markdown(
+                    f"**{doc.filename}**"
+                )
+
+                st.caption(
+                    f"Status: {doc.status}"
+                )
+
+    else:
+        st.info(
+            "No documents uploaded yet."
+        )
 
 
 def show_uploaded_documents(): # Renamed function
-    st.subheader("Upload and Manage Documents")
-    st.write("Upload your PDF files here to make them searchable and chat-ready.")
+    st.title("📂 Document Library")
+
+    st.caption(
+    "Upload PDF files and build your searchable knowledge base."
+    )
 
     uploaded_files = st.file_uploader(
         "Drag and drop PDF files here or click to browse",
@@ -446,9 +521,25 @@ def show_uploaded_documents(): # Renamed function
                             st.rerun()
 
 def show_chat_with_pdfs():
-    st.subheader("Chat with your Documents")
-    st.write("Ask questions about your uploaded PDFs and get AI-powered answers with source citations.")
+    st.title("💬 AI Document Chat")
 
+    st.caption(
+    "Ask questions about uploaded PDFs and receive AI-powered answers with citations."
+    )
+
+    col1, col2 = st.columns([8,1])
+
+    with col2:
+        if st.button("🗑 Clear Chat"):
+            st.session_state.messages = []
+
+            if "session_id" in st.session_state:
+                db_manager.delete_chat_history_for_session(
+                    st.session_state.session_id
+                )
+
+        st.rerun()
+    
     # Initialize session state for chat history if not present
     if "messages" not in st.session_state:
         st.session_state.messages = []
@@ -574,8 +665,11 @@ def show_chat_history():
                 st.rerun()
 
 def show_document_summary():
-    st.subheader("Document Summary")
-    st.write("Select an uploaded document to generate a summary.")
+    st.title("📄 AI Document Summaries")
+
+    st.caption(
+    "Generate intelligent summaries, key points and concepts."
+    )
 
     documents = db_manager.get_all_documents()
 
@@ -649,44 +743,6 @@ def show_document_summary():
                 st.error(f"Error generating summary for '{selected_filename_from_box}': {e}")
                 st.exception(e)
 
-def show_settings():
-    st.subheader("Application Settings")
-    st.write("Configure various aspects of IntelliDocs AI.")
-
-    st.markdown("### Theme Settings")
-    theme_option = st.selectbox(
-        "Choose a theme:",
-        ["Light", "Dark", "System Default"],
-        index=2, # Default to System Default
-        help="This feature is for demonstration. Actual theme change requires Streamlit configuration or custom CSS adjustments."
-    )
-    st.info(f"Current selected theme: {theme_option}")
-
-    st.markdown("### RAG Parameters")
-    num_chunks_retrieval = st.slider(
-        "Number of chunks to retrieve for RAG:",
-        min_value=1, max_value=10, value=5,
-        step=1,
-        help="Determines how many relevant document chunks are fetched for context."
-    )
-    st.info(f"Retrieving {num_chunks_retrieval} chunks.")
-
-    llm_temperature = st.slider(
-        "LLM Temperature (creativity):",
-        min_value=0.0, max_value=1.0, value=0.7,
-        step=0.05,
-        help="Controls the randomness of LLM's output. Lower = more deterministic, Higher = more creative."
-    )
-    st.info(f"LLM Temperature set to {llm_temperature}")
-
-    top_k_llm = st.slider(
-        "LLM Top-K (token sampling):",
-        min_value=1, max_value=100, value=40,
-        step=1,
-        help="Controls the number of highest probability vocabulary tokens to consider for each generation step."
-    )
-    st.info(f"LLM Top-K set to {top_k_llm}")
-
 def show_about_project():
     st.subheader("About IntelliDocs AI")
     st.write("Learn more about this project, its architecture, and the team behind it.")
@@ -714,7 +770,7 @@ def show_about_project():
     The system follows a modular architecture, separating concerns into Frontend, Backend (API, AI Pipeline, Database), and Data storage layers. This design ensures scalability, maintainability, and ease of development.
 
     ### Developed by
-    [Your Name/Team Name] - Google Colab Unified DSA Agent
+    [Payal Jangale] - Google Colab Unified DSA Agent
     """)
 
 
@@ -729,7 +785,5 @@ elif st.session_state.current_page == "Chat History":
     show_chat_history()
 elif st.session_state.current_page == "Uploaded Documents":
     show_uploaded_documents()
-elif st.session_state.current_page == "Settings":
-    show_settings()
 elif st.session_state.current_page == "About Project":
     show_about_project()
