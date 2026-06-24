@@ -1,14 +1,11 @@
 
 import google.generativeai as genai
-import os
 import re
+import streamlit as st
 
 class Summarizer:
     def __init__(self, model_name: str = 'gemini-pro'):
-        self.gemini_api_key = os.getenv('GOOGLE_API_KEY')
-
-        if not self.gemini_api_key:
-            raise ValueError("GOOGLE_API_KEY not found in environment variables. Please set it in your .env file.")
+        self.gemini_api_key = st.secrets["GOOGLE_API_KEY"]
 
         genai.configure(api_key=self.gemini_api_key)
         self.model = genai.GenerativeModel(model_name)
@@ -41,8 +38,11 @@ Key Points:"""
         try:
             response = self.model.generate_content(prompt)
             key_points_str = response.text
-            key_points = [point.strip() for point in key_points_str.split('
-') if point.strip() and re.match(r'^\d+\.', point.strip())]
+            key_points = [
+                point.strip()
+                for point in key_points_str.split('\n')
+                if point.strip() and re.match(r'^\d+\.', point.strip())
+            ]
             return key_points
         except Exception as e:
             return [f"Failed to extract key points due to an error: {e}"]
