@@ -28,7 +28,11 @@ class Document(Base):
 class ChatHistory(Base):
     __tablename__ = 'chat_history'
     chat_id = Column(Integer, primary_key=True, autoincrement=True)
-    session_id = Column(String, nullable=False)
+    session_id = Column(
+        String,
+        ForeignKey('user_sessions.session_id'),
+        nullable=False
+    )
     document_id = Column(Integer, ForeignKey('documents.document_id'), nullable=True)
     question = Column(Text, nullable=False)
     answer = Column(Text, nullable=False)
@@ -67,8 +71,10 @@ class UserSession(Base):
     user_id = Column(String, nullable=True) # Optional: For authenticated users
 
     # Relationships
-    chat_history_entries = relationship('ChatHistory', backref='session', lazy=True)
-
+    chat_history_entries = relationship(
+        'ChatHistory',
+        back_populates='user_session'
+    )
     def __repr__(self):
         return f"<UserSession(session_id='{self.session_id}', last_active='{self.last_active}')>"
 
