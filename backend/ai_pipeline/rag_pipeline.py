@@ -29,8 +29,9 @@ class RAGPipeline:
                 content = chunk.get('content', 'N/A')
                 doc_id = chunk.get('document_id', 'N/A')
                 page_num = chunk.get('page_number', 'N/A')
-                prompt_parts.append(f"Document ID: {doc_id}, Page: {page_num}:
-{content}")
+                prompt_parts.append(
+                     f"Document ID: {doc_id}, Page: {page_num}:\n{content}"
+                )
 
         if chat_history:
             prompt_parts.append("""--- Chat History ---""")
@@ -41,9 +42,7 @@ class RAGPipeline:
         prompt_parts.append("""--- User Query ---""")
         prompt_parts.append(query)
 
-        return "
-
-".join(prompt_parts)
+       return "\n\n".join(prompt_parts)
 
     def generate_answer(self, query: str, retrieved_chunks: list, chat_history: list = None) -> dict:
         prompt_text = self._build_prompt(query, retrieved_chunks, chat_history)
