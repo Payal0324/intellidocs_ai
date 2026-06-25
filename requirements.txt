@@ -3,11 +3,11 @@ fastapi
 uvicorn
 streamlit
 pymupdf
-sentence-transformers
+sentence-transformers>=2.7.0
 faiss-cpu
 python-dotenv
-google-generativeai
+google-generativeai>=0.8.0
 langchain-text-splitters
 SQLAlchemy
-torch
-torchvision
+torch>=2.2.0
+torchvision>=0.17.0
