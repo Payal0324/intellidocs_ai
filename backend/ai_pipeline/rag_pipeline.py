@@ -57,7 +57,7 @@ class RAGPipeline:
         citation_pattern = re.compile(r'\(Doc: ([A-Za-z0-9_]+), Page: (\d+)\)')
 
         try:
-            model = genai.GenerativeModel('gemini-pro')
+            model = genai.GenerativeModel('gemini-1.5-flash')
             response = model.generate_content(prompt_text)
 
             ai_answer = response.text
