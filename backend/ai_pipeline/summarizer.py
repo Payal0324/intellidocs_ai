@@ -4,11 +4,11 @@ import re
 import streamlit as st
 
 class Summarizer:
-    def __init__(self, model_name: str = 'gemini-pro'):
+    def __init__(self, model_name: str = 'gemini-1.5-flash'):
         self.gemini_api_key = st.secrets["GOOGLE_API_KEY"]
 
         genai.configure(api_key=self.gemini_api_key)
-        self.model = genai.GenerativeModel(model_name='gemini-pro')
+        self.model = genai.GenerativeModel(model_name='gemini-1.5-flash')
 
     def summarize_text(self, text: str, max_words: int = 200) -> str:
         if not text.strip():
