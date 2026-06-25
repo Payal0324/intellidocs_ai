@@ -19,206 +19,165 @@ from backend.ai_pipeline.summarizer import Summarizer # Import Summarizer
 
 st.set_page_config(
     page_title="IntelliDocs AI",
-    page_icon="📄",
+    page_icon="🧠",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
 # Custom CSS for a modern, premium UI/UX
-st.markdown(
-    """
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+st.markdown("""
+<style>
 
-    :root {
-        --primary-color: #4A90E2; /* Blue */
-        --secondary-color: #50E3C2; /* Teal */
-        --background-color: #F8F9FA; /* Light Gray */
-        --card-background: #FFFFFF; /* White */
-        --text-color: #343A40; /* Dark Gray */
-        --light-text-color: #6C757D; /* Medium Gray */
-        --border-color: #E0E0E0; /* Lighter Gray */
-        --shadow-light: rgba(0, 0, 0, 0.08);
-        --shadow-medium: rgba(0, 0, 0, 0.15);
-    }
+/* =========================
+   GLOBAL THEME (ChatGPT-like)
+========================= */
 
-    html, body, [class*="st-"] {
-        font-family: 'Roboto', sans-serif;
-        color: var(--text-color);
-    }
+.main {
+    background-color: #0B0F19;
+    color: #E5E7EB;
+    font-family: 'Inter', sans-serif;
+}
 
-    /* Main container and sidebar styling */
-    .main .block-container {
-        padding-top: 2rem;
-        padding-right: 2rem;
-        padding-left: 2rem;
-        padding-bottom: 2rem;
-    }
-    .st-emotion-cache-1pxczg0.e1gf0tb51 > div {
-        background-color: var(--background-color);
-    }
-    .st-emotion-cache-z5rd5b {
-        background-color: var(--card-background);
-        padding: 1.5rem;
-        border-radius: 12px;
-        box-shadow: 0 4px 15px var(--shadow-light);
-        border: 1px solid var(--border-color);
-    }
-    .st-emotion-cache-1pxczg0.e1gf0tb51 {
-      padding-top: 1rem;
-    }
+/* Hide Streamlit branding */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
 
-    /* Header styling */
-    .header-container {
-        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
-        padding: 1.5rem 2rem;
-        border-radius: 0 0 15px 15px;
-        box-shadow: 0 4px 20px var(--shadow-medium);
-        color: white;
-        margin-bottom: 2rem;
-    }
-    .header-container h1, .header-container h2, .header-container h3 {
-        color: white;
-    }
-    .header-container .stMarkdown p {
-        color: rgba(255, 255, 255, 0.8);
-    }
+/* =========================
+   SIDEBAR
+========================= */
 
-    /* Card styling */
-    .st-emotion-cache-f60vps {
-        background-color: var(--card-background);
-        border-radius: 12px;
-        box-shadow: 0 4px 15px var(--shadow-light);
-        padding: 1.5rem;
-        margin-bottom: 1rem;
-        border: 1px solid var(--border-color);
-    }
-    .st-emotion-cache-f60vps:hover {
-        box-shadow: 0 6px 20px var(--shadow-medium);
-        transform: translateY(-2px);
-        transition: all 0.3s ease-in-out;
-    }
+section[data-testid="stSidebar"] {
+    background-color: #0F172A;
+    border-right: 1px solid #1F2937;
+}
 
-    /* Buttons */
-    .st-emotion-cache-f705ad, .st-emotion-cache-q8spsw, .st-emotion-cache-1c19ifw { /* Added .st-emotion-cache-1c19ifw for primary button on dashboard */
-        background-color: var(--primary-color);
-        color: white;
-        border-radius: 8px;
-        border: none;
-        padding: 0.7rem 1.2rem;
-        font-weight: 600;
-        transition: background-color 0.2s ease;
-    }
-    .st-emotion-cache-f705ad:hover, .st-emotion-cache-q8spsw:hover, .st-emotion-cache-1c19ifw:hover {
-        background-color: #3A7ABD; /* Darker Primary */
-        color: white;
-    }
-    .st-emotion-cache-f705ad:focus, .st-emotion-cache-q8spsw:focus, .st-emotion-cache-1c19ifw:focus {
-        box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.5);
-    }
+section[data-testid="stSidebar"] * {
+    color: #E5E7EB;
+}
 
-    /* Inputs */
-    .st-emotion-cache-1c9f20d, .st-emotion-cache-135wmpj, .st-emotion-cache-1gjnkpt {
-        border-radius: 8px;
-        border: 1px solid var(--border-color);
-        box-shadow: inset 0 1px 3px var(--shadow-light);
-        padding: 0.5rem 1rem;
-    }
+/* Sidebar buttons */
+section[data-testid="stSidebar"] .stButton button {
+    background-color: transparent;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    color: #E5E7EB;
+    padding: 10px;
+}
 
-    /* Sidebar navigation */
-    .st-emotion-cache-zq5wmm.ezr6i8g1 > div:first-child {
-        background-color: var(--card-background);
-        padding: 1rem;
-        border-radius: 0 12px 12px 0;
-        box-shadow: 4px 0 15px var(--shadow-light);
-    }
-    .st-emotion-cache-zq5wmm.ezr6i8g1 .st-emotion-cache-1y48h6w a {
-        color: var(--text-color);
-        text-decoration: none;
-        padding: 0.8rem 1rem;
-        margin: 0.2rem 0;
-        border-radius: 8px;
-        transition: background-color 0.2s ease, color 0.2s ease;
-        display: flex;
-        align-items: center;
-    }
-    .st-emotion-cache-zq5wmm.ezr6i8g1 .st-emotion-cache-1y48h6w a:hover {
-        background-color: rgba(74, 144, 226, 0.1);
-        color: var(--primary-color);
-    }
-    .st-emotion-cache-zq5wmm.ezr6i8g1 .st-emotion-cache-1y48h6w a.active {
-        background-color: var(--primary-color);
-        color: white;
-        font-weight: 600;
-    }
+section[data-testid="stSidebar"] .stButton button:hover {
+    background-color: #1E293B;
+}
 
-    /* Metric cards */
-    .st-emotion-cache-1r650o0 {
-        background-color: var(--card-background);
-        border-radius: 12px;
-        box-shadow: 0 4px 15px var(--shadow-light);
-        padding: 1rem;
-        margin-bottom: 1rem;
-        border: 1px solid var(--border-color);
-        text-align: center;
-    }
-    .st-emotion-cache-1r650o0 label {
-        color: var(--light-text-color);
-        font-size: 0.9em;
-        margin-bottom: 0.5rem;
-    }
-    .st-emotion-cache-1r650o0 div[data-testid="stMetricValue"] {
-        font-size: 2.2em;
-        font-weight: 700;
-        color: var(--primary-color);
-    }
+/* =========================
+   HEADINGS
+========================= */
 
-    /* Chat messages */
-    .chat-message {
-        padding: 10px 15px;
-        border-radius: 15px;
-        margin-bottom: 10px;
-        max-width: 80%;
-        word-wrap: break-word;
-        box-shadow: 0 2px 5px var(--shadow-light);
-    }
-    .user-message {
-        background-color: var(--primary-color);
-        color: white;
-        align-self: flex-end;
-        border-bottom-right-radius: 5px;
-    }
-    .ai-message {
-        background-color: var(--card-background);
-        color: var(--text-color);
-        align-self: flex-start;
-        border: 1px solid var(--border-color);
-        border-bottom-left-radius: 5px;
-    }
-    .chat-container {
-        display: flex;
-        flex-direction: column;
-    }
+h1, h2, h3 {
+    color: #F9FAFB;
+    font-weight: 600;
+}
 
-    /* Source citations */
-    .citation {
-        font-size: 0.8em;
-        color: var(--light-text-color);
-        margin-top: 5px;
-        padding-left: 5px;
-        border-left: 2px solid var(--secondary-color);
-    }
+/* =========================
+   BUTTONS
+========================= */
 
-    /* Icons in sidebar */
-    .icon-class {
-        margin-right: 10px;
-        color: var(--primary-color);
-    }
+.stButton button {
+    background-color: #2563EB;
+    color: white;
+    border-radius: 10px;
+    border: none;
+    padding: 10px 16px;
+    font-weight: 600;
+    transition: 0.2s ease-in-out;
+}
 
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+.stButton button:hover {
+    background-color: #1D4ED8;
+    transform: translateY(-1px);
+}
+
+/* =========================
+   CHAT INPUT
+========================= */
+
+.stChatInputContainer {
+    border-radius: 12px;
+}
+
+/* Chat bubbles */
+.stChatMessage {
+    border-radius: 12px;
+}
+
+/* =========================
+   METRICS CARDS
+========================= */
+
+[data-testid="metric-container"] {
+    background-color: #111827;
+    border: 1px solid #1F2937;
+    padding: 16px;
+    border-radius: 14px;
+}
+
+[data-testid="metric-container"] label {
+    color: #9CA3AF;
+}
+
+[data-testid="metric-container"] [data-testid="stMetricValue"] {
+    color: #60A5FA;
+}
+
+/* =========================
+   FILE UPLOADER
+========================= */
+
+[data-testid="stFileUploader"] {
+    border: 2px dashed #3B82F6;
+    border-radius: 14px;
+    padding: 20px;
+    background-color: #0F172A;
+}
+
+/* =========================
+   CARDS / CONTAINERS
+========================= */
+
+div[data-testid="stVerticalBlock"] > div:has(div.stContainer) {
+    background-color: #0F172A;
+    border: 1px solid #1F2937;
+    border-radius: 14px;
+    padding: 16px;
+}
+
+/* =========================
+   SUCCESS / INFO BOXES
+========================= */
+
+.stSuccess, .stInfo, .stWarning {
+    border-radius: 10px;
+}
+
+/* =========================
+   SCROLLBAR (Modern)
+========================= */
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}
+
+</style>
+""", unsafe_allow_html=True)
 
 # Initialize backend managers
 @st.cache_resource
@@ -254,11 +213,10 @@ summarizer = get_summarizer() # Get the summarizer instance
 
 
 # Header Section
-st.markdown('<div class="header-container">', unsafe_allow_html=True)
-st.title("IntelliDocs AI")
-st.write("Your intelligent document interaction system.")
-st.info("System Status: Operational") # Placeholder for a dynamic status indicator
-st.markdown('</div>', unsafe_allow_html=True)
+st.markdown("## 🧠 IntelliDocs AI")
+st.caption("Intelligent Multi-PDF Conversational Knowledge Assistant using RAG")
+
+st.markdown("---")
 
 # Initialize session state for navigation
 if 'current_page' not in st.session_state:
@@ -266,73 +224,137 @@ if 'current_page' not in st.session_state:
 
 # Sidebar Navigation
 with st.sidebar:
-    st.image("https://i.imgur.com/your-logo.png", use_column_width=True) # Placeholder for logo
-    st.markdown("## Navigation")
 
-    pages = {
-        "Dashboard": "🏠",
-        "Chat with PDFs": "💬",
-        "Document Summary": "📝",
-        "Chat History": "🕰️",
-        "Uploaded Documents": "📂",
-        "Settings": "⚙️",
-        "About Project": "ℹ️"
-    }
+    # App Title
+    st.markdown("## 🧠 IntelliDocs AI")
+    st.caption("RAG-powered Document Intelligence")
 
-    selected_page = st.radio(
-        "Go to",
-        list(pages.keys()),
-        format_func=lambda page_name: f"{pages[page_name]} {page_name}",
-        key="sidebar_radio"
-    )
+    st.markdown("---")
 
-    if selected_page:
-        st.session_state.current_page = selected_page
+    # Navigation Title
+    st.markdown("### Navigation")
 
-# Main Content Area based on selected page
-st.markdown("<br>", unsafe_allow_html=True)
+    # Custom navigation buttons (ChatGPT style)
+    if st.button("🏠 Dashboard", use_container_width=True):
+        st.session_state.current_page = "Dashboard"
+
+    if st.button("💬 Chat with PDFs", use_container_width=True):
+        st.session_state.current_page = "Chat with PDFs"
+
+    if st.button("📝 Document Summary", use_container_width=True):
+        st.session_state.current_page = "Document Summary"
+
+    if st.button("🕒 Chat History", use_container_width=True):
+        st.session_state.current_page = "Chat History"
+
+    if st.button("📂 Uploaded Documents", use_container_width=True):
+        st.session_state.current_page = "Uploaded Documents"
+
+    st.markdown("---")
+
+    # Quick Info Section (mini dashboard feel)
+    st.markdown("### 📊 Quick Stats")
+
+    try:
+        db = db_manager.get_all_documents()
+        st.metric("Total Documents", len(db))
+    except:
+        st.metric("Total Documents", "0")
+
+    st.markdown("---")
+
+    # About Section
+    st.markdown("### ℹ️ About")
+    st.caption("Upload PDFs → Ask Questions → Get AI Answers with Citations")
+
+    st.markdown("---")
+
+    st.caption("Made with ❤️ using Streamlit + LLM + RAG")
 
 # Function for Dashboard
 def show_dashboard():
-    st.subheader("Dashboard Overview")
-    st.write("Welcome to your IntelliDocs AI Dashboard. Here you will find key metrics and quick actions.")
 
-    st.markdown("### Key Metrics")
-    col1, col2, col3, col4 = st.columns(4)
+    st.markdown("## 🧠 Welcome to IntelliDocs AI")
+    st.caption("Transform your PDFs into an intelligent conversational knowledge base")
+
+    st.markdown("---")
+
+    # =========================
+    # REAL METRICS (DYNAMIC)
+    # =========================
+    col1, col2, col3 = st.columns(3)
+
+    try:
+        documents = db_manager.get_all_documents()
+        total_docs = len(documents)
+    except:
+        total_docs = 0
+
+    try:
+        total_pages = sum([doc.num_pages or 0 for doc in documents])
+    except:
+        total_pages = 0
+
+    try:
+        chats = db_manager.get_chat_history(st.session_state.get("session_id", "default"))
+        total_chats = len(chats)
+    except:
+        total_chats = 0
 
     with col1:
-        st.metric(label="Total Uploaded PDFs", value="0") # Placeholder
+        st.metric("📄 Documents", total_docs)
+
     with col2:
-        st.metric(label="Total Pages Processed", value="0") # Placeholder
+        st.metric("📑 Pages Processed", total_pages)
+
     with col3:
-        st.metric(label="Number of Chats", value="0") # Placeholder
-    with col4:
-        st.metric(label="Number of Summaries Generated", value="0") # Placeholder
+        st.metric("💬 Conversations", total_chats)
 
-    st.markdown("### Feature Highlights")
-    st.markdown("""
-    - **Intelligent PDF Interaction**: Ask questions and get answers directly from your documents.
-    - **Contextual Chat History**: Maintain conversation context across sessions.
-    - **Automated Summarization**: Quickly grasp the essence of lengthy documents.
-    - **Secure Document Management**: Easily upload, view, and delete your PDF files.
-    - **Personalized Settings**: Customize your experience with various application settings.
-    """)
+    st.markdown("---")
 
-    st.markdown("### Quick Actions")
-    col_qa1, col_qa2, col_qa3 = st.columns(3)
-    with col_qa1:
-        if st.button("Upload New PDF", use_container_width=True):
+    # =========================
+    # QUICK ACTIONS (CLEAN UI)
+    # =========================
+    st.markdown("### ⚡ Quick Actions")
+
+    colA, colB, colC = st.columns(3)
+
+    with colA:
+        if st.button("📤 Upload PDF", use_container_width=True):
             st.session_state.current_page = "Uploaded Documents"
             st.rerun()
-    with col_qa2:
-        if st.button("Start Chat", use_container_width=True):
+
+    with colB:
+        if st.button("💬 Start Chat", use_container_width=True):
             st.session_state.current_page = "Chat with PDFs"
             st.rerun()
-    with col_qa3:
-        if st.button("View Documents", use_container_width=True):
+
+    with colC:
+        if st.button("📂 View Documents", use_container_width=True):
             st.session_state.current_page = "Uploaded Documents"
             st.rerun()
 
+    st.markdown("---")
+
+    # =========================
+    # ACTIVITY SNAPSHOT (NEW IDEA)
+    # =========================
+    st.markdown("### 📊 System Snapshot")
+
+    colx, coly = st.columns(2)
+
+    with colx:
+        st.info("📌 Upload PDFs → System creates embeddings → Stores in FAISS")
+
+    with coly:
+        st.info("🤖 Ask questions → RAG retrieves context → Gemini generates answer")
+
+    st.markdown("---")
+
+    # =========================
+    # CLEAN FOOTER STYLE
+    # =========================
+    st.success("System Status: Ready for Document Intelligence 🚀")
 
 def show_uploaded_documents(): # Renamed function
     st.subheader("Upload and Manage Documents")
@@ -445,277 +467,580 @@ def show_uploaded_documents(): # Renamed function
                             st.success(f"Document '{doc.filename}' deleted.")
                             st.rerun()
 
-def show_chat_with_pdfs():
-    st.subheader("Chat with your Documents")
-    st.write("Ask questions about your uploaded PDFs and get AI-powered answers with source citations.")
+def show_uploaded_documents():
+    st.markdown("## 📂 Document Library")
+    st.caption("Upload, manage, and view all your documents in one place")
 
-    # Initialize session state for chat history if not present
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
+    # ---------------- UPLOAD SECTION ----------------
+    with st.container():
+        st.markdown("### ⬆️ Upload Documents")
 
-    # Initialize session ID
-    if "session_id" not in st.session_state:
-        st.session_state.session_id = str(uuid.uuid4())
-        db_manager.create_user_session(st.session_state.session_id) # Create a new session in DB
+        uploaded_files = st.file_uploader(
+            "Drop your PDFs here",
+            type=["pdf"],
+            accept_multiple_files=True,
+            label_visibility="collapsed"
+        )
 
-    # Display chat messages
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
-            if "citations" in message and message["citations"]:
-                citation_str = ", ".join([f"(Doc: {c['document_id']}, Page: {c['page_number']})" for c in message["citations"]])
-                st.markdown(f"<div class='citation'>Sources: {citation_str}</div>", unsafe_allow_html=True)
+        if uploaded_files:
+            for uploaded_file in uploaded_files:
 
-    # Chat input area
-    if prompt := st.chat_input("Ask a question about your documents..."):
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.markdown(prompt)
+                file_name = uploaded_file.name
+                document_uuid = str(uuid.uuid4())
+                temp_file_path = os.path.join(
+                    "data", "uploaded_pdfs",
+                    f"{document_uuid}_{file_name}"
+                )
 
-        with st.spinner("Thinking..."):
-            # Generate query embedding
-            query_embedding = embedding_generator.generate_query_embedding(prompt)
-            # Retrieve relevant chunks
-            retrieved_chunks = vector_store_manager.search_similar(query_embedding)
+                os.makedirs(os.path.dirname(temp_file_path), exist_ok=True)
+                with open(temp_file_path, "wb") as f:
+                    f.write(uploaded_file.getbuffer())
 
-            # Convert chat history for RAGPipeline (only last few turns)
-            chat_history_for_rag = []
-            for msg in st.session_state.messages[:-1]: # Exclude current prompt
-                if msg["role"] == "user":
-                    chat_history_for_rag.append({"question": msg["content"], "answer": ""})
-                elif msg["role"] == "assistant":
-                    # Assuming AI messages are direct answers or have 'answer' field
-                    chat_history_for_rag[-1]["answer"] = msg["content"] # Update the last user entry with AI's answer
+                progress = st.progress(0)
+                status_text = st.empty()
 
-            # Generate AI answer
-            response = rag_pipeline.generate_answer(prompt, retrieved_chunks, chat_history_for_rag)
-            ai_answer = response.get('answer', 'Sorry, I could not generate an answer.')
-            citations = response.get('citations', [])
+                try:
+                    status_text.info(f"Processing {file_name}...")
 
-            with st.chat_message("assistant"):
-                st.markdown(ai_answer)
-                if citations:
-                    citation_str = ", ".join([f"(Doc: {c['document_id']}, Page: {c['page_number']})" for c in citations])
-                    st.markdown(f"<div class='citation'>Sources: {citation_str}</div>", unsafe_allow_html=True)
+                    new_doc = db_manager.add_document(
+                        filename=file_name,
+                        status='processing',
+                        file_path=temp_file_path
+                    )
+                    document_id = new_doc.document_id
 
-            st.session_state.messages.append({"role": "assistant", "content": ai_answer, "citations": citations})
+                    progress.progress(20)
 
-            # Save to chat history in DB (linking to document if relevant, for now just session)
-            # For simplicity, we'll link to the document of the first retrieved chunk if any
-            linked_document_id = None
-            if retrieved_chunks:
-                linked_document_id = retrieved_chunks[0].get('document_id')
+                    extracted_data = pdf_processor.extract_text_from_pdf(temp_file_path)
+                    num_pages = len(extracted_data)
 
-            db_manager.save_chat_entry(
-                session_id=st.session_state.session_id,
-                question=prompt,
-                answer=ai_answer,
-                citations=str(citations), # Store citations as string/JSON string
-                document_id=linked_document_id
-            )
-            db_manager.update_session_activity(st.session_state.session_id)
+                    progress.progress(40)
 
-def show_chat_history():
-    st.subheader("Chat History")
-    st.write("Review your past conversations with IntelliDocs AI.")
+                    embeddings = embedding_generator.generate_embeddings_for_document_pages(
+                        extracted_data, str(document_id)
+                    )
 
-    # Initialize session ID if not present (should already be from chat page, but for direct access)
-    if "session_id" not in st.session_state:
-        st.session_state.session_id = str(uuid.uuid4())
-        db_manager.create_user_session(st.session_state.session_id)
+                    progress.progress(60)
 
-    search_query = st.text_input("Search chat history", key="chat_history_search_input", placeholder="Enter keywords to search...")
+                    vector_store_manager.add_embeddings(embeddings)
 
-    # Fetch all chat history for the current session
-    all_history = db_manager.get_chat_history(st.session_state.session_id)
+                    for chunk in embeddings:
+                        db_manager.add_chunk(
+                            document_id=document_id,
+                            text_content=chunk['content'],
+                            page_number=chunk['page_number']
+                        )
 
-    if not all_history:
-        st.info("No chat history found for this session. Start a conversation in 'Chat with PDFs'!")
-    else:
-        # Filter history based on search query
-        filtered_history = [entry for entry in all_history if search_query.lower() in entry.question.lower() or search_query.lower() in entry.answer.lower()]
+                    progress.progress(80)
 
-        if not filtered_history:
-            st.warning("No chat entries match your search query.")
-        else:
-            # Display chat history entries as cards
-            for i, entry in enumerate(filtered_history):
-                with st.container(border=True):
-                    col1, col2 = st.columns([4, 1])
-                    with col1:
-                        st.markdown(f"**Question:** {entry.question}")
-                        st.markdown(f"**Answer Preview:** {entry.answer[:150]}...")
-                        if entry.document_id:
-                            doc = db_manager.get_document_by_id(entry.document_id)
-                            doc_filename = doc.filename if doc else "Unknown Document"
-                            st.markdown(f"_Related Document:_ {doc_filename}")
-                        if entry.citations:
-                            try:
-                                # Citations are stored as stringified JSON
-                                citation_list = json.loads(entry.citations)
-                                if citation_list:
-                                    citation_str = ", ".join([f"(Doc: {c['document_id']}, Page: {c['page_number']})" for c in citation_list])
-                                    st.markdown(f"<div class='citation'>Sources: {citation_str}</div>", unsafe_allow_html=True)
-                            except json.JSONDecodeError:
-                                st.markdown(f"<div class='citation'>Sources: {entry.citations}</div>", unsafe_allow_html=True)
+                    db_manager.update_document_status(
+                        document_id,
+                        'completed',
+                        num_pages=num_pages
+                    )
 
-                    with col2:
-                        st.markdown(f"<small>{entry.timestamp.strftime('%Y-%m-%d %H:%M')}</small>", unsafe_allow_html=True)
-                        if st.button("Delete", key=f"delete_chat_{entry.chat_id}"):
-                            # Implement delete functionality for individual chat entries
-                            db_manager.delete_chat_entry(entry.chat_id) # Assuming delete_chat_entry exists
-                            st.success(f"Chat entry {entry.chat_id} deleted.")
-                            st.rerun()
+                    progress.progress(100)
 
-            st.markdown("--- Other Actions ---")
-            if st.button("Clear All Chat History"):
-                db_manager.delete_chat_history_for_session(st.session_state.session_id)
-                st.success("All chat history cleared.")
+                    status_text.success(f"✅ {file_name} processed successfully!")
+
+                except Exception as e:
+                    status_text.error(f"❌ Error: {file_name}")
+                    db_manager.update_document_status(document_id, 'failed')
+                    st.exception(e)
+
                 st.rerun()
 
-def show_document_summary():
-    st.subheader("Document Summary")
-    st.write("Select an uploaded document to generate a summary.")
+    st.divider()
+
+    # ---------------- DOCUMENT LIST ----------------
+    st.markdown("### 📄 Your Documents")
 
     documents = db_manager.get_all_documents()
 
     if not documents:
-        st.info("No documents uploaded yet. Please upload documents in the 'Uploaded Documents' page to enable summarization.")
+        st.info("No documents uploaded yet.")
         return
 
-    # Determine selected document based on session state or new selection
-    selected_document_id = st.session_state.get('selected_document_id', None)
-    selected_filename = None
+    # Cards UI (ChatGPT style)
+    for doc in documents:
+        with st.container():
+            st.markdown(
+                f"""
+                <div style="
+                    padding:15px;
+                    border-radius:12px;
+                    border:1px solid #e0e0e0;
+                    margin-bottom:10px;
+                    background:white;
+                ">
+                    <h4 style="margin-bottom:5px;">📄 {doc.filename}</h4>
+                    <p style="margin:0; color:gray;">
+                        Status: <b>{doc.status}</b> |
+                        Pages: {doc.num_pages if doc.num_pages else "N/A"} |
+                        Uploaded: {doc.upload_date.strftime('%Y-%m-%d %H:%M')}
+                    </p>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
 
-    document_options = {doc.filename: doc.document_id for doc in documents}
+            col1, col2, col3 = st.columns([1,1,4])
 
-    if selected_document_id:
-        # Find the filename for the pre-selected ID
-        for filename, doc_id in document_options.items():
-            if doc_id == selected_document_id:
-                selected_filename = filename
-                break
-        # Set default index for selectbox
-        initial_index = list(document_options.keys()).index(selected_filename) if selected_filename else 0
-    else:
-        initial_index = 0 # Default to first document if nothing pre-selected
+            with col1:
+                if st.button("📑 Summary", key=f"sum_{doc.document_id}"):
+                    st.session_state.selected_document_id = doc.document_id
+                    st.session_state.current_page = "Document Summary"
+                    st.rerun()
 
-    # Selectbox for documents
-    selected_filename_from_box = st.selectbox(
-        "Choose a document to summarize:",
-        list(document_options.keys()),
-        index=initial_index, # Pre-select if ID is present, otherwise first
-        placeholder="Select a document...",
-        key="summary_doc_selector"
+            with col2:
+                if st.button("🗑️ Delete", key=f"del_{doc.document_id}"):
+                    db_manager.delete_document(doc.document_id)
+                    st.rerun()
+                    
+def show_chat_history():
+    st.subheader("💬 Chat History")
+    st.caption("Review and manage all your past conversations.")
+
+    # Ensure session exists
+    if "session_id" not in st.session_state:
+        st.session_state.session_id = str(uuid.uuid4())
+        db_manager.create_user_session(st.session_state.session_id)
+
+    # Search bar (clean)
+    search_query = st.text_input(
+        "",
+        placeholder="🔍 Search questions or answers...",
+        key="chat_history_search_input"
     )
 
-    if selected_filename_from_box:
-        current_selected_document_id = document_options[selected_filename_from_box]
-        # Update session state if user changes selection in the dropdown
-        if current_selected_document_id != st.session_state.get('selected_document_id_from_box', None):
-            st.session_state.selected_document_id_from_box = current_selected_document_id
+    all_history = db_manager.get_chat_history(st.session_state.session_id)
+
+    if not all_history:
+        st.info("No chat history found. Start chatting with your PDFs first.")
+        return
+
+    # Filter
+    filtered_history = [
+        entry for entry in all_history
+        if search_query.lower() in entry.question.lower()
+        or search_query.lower() in entry.answer.lower()
+    ] if search_query else all_history
+
+    if not filtered_history:
+        st.warning("No results found for your search.")
+        return
+
+    # Top actions bar
+    colA, colB = st.columns([3, 1])
+
+    with colB:
+        if st.button("🗑️ Clear All History", use_container_width=True):
+            db_manager.delete_chat_history_for_session(st.session_state.session_id)
+            st.success("Chat history cleared.")
             st.rerun()
 
-        document_to_summarize_id = st.session_state.get('selected_document_id_from_box', current_selected_document_id)
+    st.markdown("---")
 
-        with st.spinner(f"Generating summary for '{selected_filename_from_box}'..."):
-            try:
-                # Retrieve all chunks for the selected document
-                chunks = db_manager.get_chunks_by_document_id(document_to_summarize_id)
-                full_text = " ".join([chunk.text_content for chunk in chunks])
+    # CHAT STYLE DISPLAY
+    for entry in reversed(filtered_history):  # latest first
+        with st.container():
+            st.markdown("")
 
-                if not full_text.strip():
-                    st.warning("Selected document has no extractable text for summarization.")
-                    return
+            # Card UI
+            st.markdown(
+                f"""
+                <div style="
+                    background: #ffffff;
+                    border: 1px solid #e6e6e6;
+                    border-radius: 12px;
+                    padding: 15px 18px;
+                    margin-bottom: 12px;
+                    box-shadow: 0px 2px 8px rgba(0,0,0,0.05);
+                ">
+                    <div style="font-size:14px; color:#888;">
+                        🕒 {entry.timestamp.strftime('%Y-%m-%d %H:%M')}
+                    </div>
 
-                # Generate summary
-                generated_summary = summarizer.summarize_text(full_text)
+                    <div style="margin-top:8px; font-weight:600; color:#333;">
+                        🧑 You: {entry.question}
+                    </div>
 
-                st.markdown(f"### Summary of {selected_filename_from_box}")
-                with st.container(border=True):
-                    st.write(generated_summary)
+                    <div style="margin-top:10px; color:#444; line-height:1.5;">
+                        🤖 AI: {entry.answer[:300]}...
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
 
-                # Placeholder for Key Points, Concepts, Keywords
-                # These would typically be extracted/generated in a more advanced summarizer.
-                with st.expander("Key Points (Placeholder)"):
-                    st.write("Key point 1: Document emphasizes X.")
-                    st.write("Key point 2: Major conclusion is Y.")
-                with st.expander("Important Concepts (Placeholder)"):
-                    st.write("Concept A, Concept B, Concept B")
-                with st.expander("Keywords (Placeholder)"):
-                    st.write("Keyword1, Keyword2, Keyword3")
+            # Buttons row
+            c1, c2 = st.columns([1, 6])
 
-            except Exception as e:
-                st.error(f"Error generating summary for '{selected_filename_from_box}': {e}")
-                st.exception(e)
+            with c1:
+                if st.button("🗑️ Delete", key=f"del_{entry.chat_id}"):
+                    db_manager.delete_chat_entry(entry.chat_id)
+                    st.success("Deleted")
+                    st.rerun()
 
+            with c2:
+                if entry.citations:
+                    try:
+                        citation_list = json.loads(entry.citations)
+                        if citation_list:
+                            st.caption(
+                                "📌 Sources: " +
+                                ", ".join(
+                                    [f"Doc {c['document_id']} (Pg {c['page_number']})"
+                                     for c in citation_list]
+                                )
+                            )
+                    except:
+                        pass
+
+def show_document_summary():
+    st.markdown("## 📝 Document Intelligence Center")
+    st.caption("Select a document and generate AI-powered structured insights")
+
+    documents = db_manager.get_all_documents()
+
+    if not documents:
+        st.info("No documents available. Upload PDFs first.")
+        return
+
+    # ---------------- DOCUMENT SELECTOR (ChatGPT STYLE) ----------------
+    document_map = {doc.filename: doc.document_id for doc in documents}
+
+    st.markdown("### 📄 Select Document")
+
+    selected_filename = st.selectbox(
+        "",
+        list(document_map.keys()),
+        key="summary_selector",
+        label_visibility="collapsed"
+    )
+
+    selected_doc_id = document_map[selected_filename]
+
+    st.divider()
+
+    # ---------------- FETCH CONTENT ----------------
+    with st.spinner("Analyzing document..."):
+        chunks = db_manager.get_chunks_by_document_id(selected_doc_id)
+        full_text = " ".join([c.text_content for c in chunks])
+
+    if not full_text.strip():
+        st.warning("This document has no readable text.")
+        return
+
+    # ---------------- AI SUMMARY ----------------
+    try:
+        summary = summarizer.summarize_text(full_text)
+    except Exception as e:
+        st.error("Failed to generate summary")
+        st.exception(e)
+        return
+
+    # ---------------- MAIN LAYOUT (CHATGPT STYLE SPLIT VIEW) ----------------
+    col1, col2 = st.columns([2, 1])
+
+    # LEFT SIDE → MAIN SUMMARY
+    with col1:
+        st.markdown("### 🧠 AI Summary")
+
+        st.markdown(
+            f"""
+            <div style="
+                background:white;
+                padding:20px;
+                border-radius:12px;
+                border:1px solid #e6e6e6;
+                line-height:1.6;
+                font-size:15px;
+            ">
+                {summary}
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        st.markdown("### 📌 Key Insights")
+
+        with st.expander("🟦 Important Points"):
+            st.write("• Extracted insights will appear here (can be upgraded later)")
+            st.write("• You can connect LLM-based key point extraction")
+
+        with st.expander("🟩 Concepts Detected"):
+            st.write("• Concept extraction can be enabled via summarizer upgrade")
+
+        with st.expander("🟨 Keywords"):
+            st.write("• Keyword extraction placeholder")
+
+    # RIGHT SIDE → DOCUMENT INFO PANEL
+    with col2:
+        st.markdown("### 📊 Document Info")
+
+        doc = db_manager.get_document_by_id(selected_doc_id)
+
+        st.markdown(
+            f"""
+            <div style="
+                background:#f9f9f9;
+                padding:15px;
+                border-radius:10px;
+                border:1px solid #ddd;
+            ">
+                <p><b>Filename:</b> {doc.filename}</p>
+                <p><b>Status:</b> {doc.status}</p>
+                <p><b>Pages:</b> {doc.num_pages if doc.num_pages else "N/A"}</p>
+                <p><b>Uploaded:</b> {doc.upload_date.strftime('%Y-%m-%d %H:%M')}</p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        st.markdown("### ⚡ Actions")
+
+        if st.button("💬 Ask Questions About This Doc"):
+            st.session_state.current_page = "Chat with PDFs"
+            st.rerun()
+
+        if st.button("📄 Re-generate Summary"):
+            st.rerun()
+
+        if st.button("🗑️ Delete Document"):
+            db_manager.delete_document(selected_doc_id)
+            st.success("Deleted successfully")
+            st.session_state.current_page = "Uploaded Documents"
+            st.rerun()
+            
 def show_settings():
-    st.subheader("Application Settings")
-    st.write("Configure various aspects of IntelliDocs AI.")
+    st.markdown("## ⚙️ Settings")
+    st.caption("Manage your IntelliDocs experience")
 
-    st.markdown("### Theme Settings")
-    theme_option = st.selectbox(
-        "Choose a theme:",
-        ["Light", "Dark", "System Default"],
-        index=2, # Default to System Default
-        help="This feature is for demonstration. Actual theme change requires Streamlit configuration or custom CSS adjustments."
-    )
-    st.info(f"Current selected theme: {theme_option}")
+    # ---------------- ACCOUNT / SESSION INFO ----------------
+    st.markdown("### 👤 Session Information")
 
-    st.markdown("### RAG Parameters")
-    num_chunks_retrieval = st.slider(
-        "Number of chunks to retrieve for RAG:",
-        min_value=1, max_value=10, value=5,
-        step=1,
-        help="Determines how many relevant document chunks are fetched for context."
-    )
-    st.info(f"Retrieving {num_chunks_retrieval} chunks.")
+    col1, col2 = st.columns(2)
 
-    llm_temperature = st.slider(
-        "LLM Temperature (creativity):",
-        min_value=0.0, max_value=1.0, value=0.7,
-        step=0.05,
-        help="Controls the randomness of LLM's output. Lower = more deterministic, Higher = more creative."
-    )
-    st.info(f"LLM Temperature set to {llm_temperature}")
+    with col1:
+        st.markdown(
+            """
+            <div style="
+                padding:15px;
+                border-radius:12px;
+                border:1px solid #e6e6e6;
+                background:white;
+            ">
+                <b>Session ID</b><br>
+                <span style="color:gray;">Active user session for chat tracking</span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
-    top_k_llm = st.slider(
-        "LLM Top-K (token sampling):",
-        min_value=1, max_value=100, value=40,
-        step=1,
-        help="Controls the number of highest probability vocabulary tokens to consider for each generation step."
+    with col2:
+        st.markdown(
+            f"""
+            <div style="
+                padding:15px;
+                border-radius:12px;
+                border:1px solid #e6e6e6;
+                background:white;
+            ">
+                <b>System Mode</b><br>
+                <span style="color:gray;">RAG + Gemini AI Enabled</span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    st.divider()
+
+    # ---------------- CHAT SETTINGS (REAL ONLY) ----------------
+    st.markdown("### 💬 Chat Settings")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        chat_mode = st.selectbox(
+            "Response Style",
+            ["Balanced", "Precise", "Detailed"],
+            index=0
+        )
+
+    with col2:
+        memory_mode = st.selectbox(
+            "Conversation Memory",
+            ["Session Only", "Persistent (DB)"],
+            index=0
+        )
+
+    st.divider()
+
+    # ---------------- DATA MANAGEMENT ----------------
+    st.markdown("### 🗂️ Data Management")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        if st.button("🧹 Clear Chat History"):
+            if "session_id" in st.session_state:
+                db_manager.delete_chat_history_for_session(st.session_state.session_id)
+                st.success("Chat history cleared")
+
+    with col2:
+        if st.button("🗑️ Reset All Documents"):
+            docs = db_manager.get_all_documents()
+            for doc in docs:
+                db_manager.delete_document(doc.document_id)
+            st.success("All documents deleted")
+
+    st.divider()
+
+    # ---------------- ABOUT SYSTEM ----------------
+    st.markdown("### ℹ️ System Info")
+
+    st.markdown(
+        """
+        <div style="
+            padding:15px;
+            border-radius:12px;
+            border:1px solid #e6e6e6;
+            background:white;
+            line-height:1.6;
+        ">
+        <b>IntelliDocs AI</b><br><br>
+
+        • RAG-based PDF Question Answering System<br>
+        • Powered by Google Gemini<br>
+        • Vector search using FAISS<br>
+        • Built with Streamlit<br><br>
+
+        <b>Version:</b> 1.0.0 (MVP)<br>
+        </div>
+        """,
+        unsafe_allow_html=True
     )
-    st.info(f"LLM Top-K set to {top_k_llm}")
 
 def show_about_project():
-    st.subheader("About IntelliDocs AI")
-    st.write("Learn more about this project, its architecture, and the team behind it.")
+    st.markdown("## ℹ️ About IntelliDocs AI")
+    st.caption("A modern AI-powered document intelligence system")
 
-    st.markdown("""
-    IntelliDocs AI is an intelligent document interaction system designed to enhance how users engage with PDF documents.
-    Leveraging Retrieval-Augmented Generation (RAG) principles, it allows users to:
+    # ---------------- HERO SECTION ----------------
+    st.markdown(
+        """
+        <div style="
+            padding:20px;
+            border-radius:14px;
+            border:1px solid #e6e6e6;
+            background:white;
+            line-height:1.6;
+        ">
+        <b>IntelliDocs AI</b> is a Retrieval-Augmented Generation (RAG) system that lets you
+        chat with PDFs, extract insights, and generate AI-powered summaries with source grounding.
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
-    *   **Upload PDF documents**: Easily ingest multiple PDF files into the system.
-    *   **Ask natural language questions**: Get AI-generated answers grounded in the content of the uploaded documents.
-    *   **Receive source citations**: Answers are accompanied by references to the specific documents and page numbers from which the information was retrieved.
-    *   **Review chat history**: Maintain and manage past conversations for continuity and record-keeping.
-    *   **Generate document summaries**: Quickly grasp the essence of lengthy documents.
+    st.divider()
 
-    ### Technology Stack
-    *   **Frontend**: Streamlit
-    *   **Backend & AI Orchestration**: Python
-    *   **PDF Processing**: PyMuPDF (`fitz`)
-    *   **Embedding Generation**: Sentence Transformers (`all-MiniLM-L6-v2`)
-    *   **Vector Store**: FAISS
-    *   **Large Language Model (LLM)**: Google Gemini
-    *   **Database**: SQLite (SQLAlchemy ORM)
+    # ---------------- CORE FEATURES ----------------
+    st.markdown("### 🚀 Core Capabilities")
 
-    ### Project Architecture
-    The system follows a modular architecture, separating concerns into Frontend, Backend (API, AI Pipeline, Database), and Data storage layers. This design ensures scalability, maintainability, and ease of development.
+    col1, col2 = st.columns(2)
 
-    ### Developed by
-    [Your Name/Team Name] - Google Colab Unified DSA Agent
-    """)
+    with col1:
+        st.markdown("""
+        **📄 Document Intelligence**
+        - Upload and process PDFs
+        - Extract structured text
+        - Store embeddings for semantic search
+        """)
+
+        st.markdown("""
+        **💬 AI Chat**
+        - Ask questions in natural language
+        - Context-aware responses
+        - Source-backed answers
+        """)
+
+    with col2:
+        st.markdown("""
+        **🧠 Smart Summarization**
+        - Auto-generated document summaries
+        - Key insights extraction (upgradable)
+        - Fast document understanding
+        """)
+
+        st.markdown("""
+        **🔎 Retrieval System**
+        - Vector similarity search (FAISS)
+        - Embedding-based ranking
+        - Accurate context retrieval
+        """)
+
+    st.divider()
+
+    # ---------------- TECHNOLOGY STACK ----------------
+    st.markdown("### 🧱 Tech Stack")
+
+    st.markdown(
+        """
+        <div style="
+            padding:15px;
+            border-radius:12px;
+            border:1px solid #e6e6e6;
+            background:white;
+        ">
+        <b>Frontend:</b> Streamlit<br>
+        <b>AI Model:</b> Google Gemini<br>
+        <b>Embeddings:</b> Sentence Transformers<br>
+        <b>Vector DB:</b> FAISS<br>
+        <b>Database:</b> SQLite (SQLAlchemy)<br>
+        <b>PDF Processing:</b> PyMuPDF
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.divider()
+
+    # ---------------- SYSTEM DESIGN ----------------
+    st.markdown("### 🏗️ System Design")
+
+    st.markdown(
+        """
+        <div style="
+            padding:15px;
+            border-radius:12px;
+            border:1px solid #e6e6e6;
+            background:white;
+            line-height:1.6;
+        ">
+        <b>Architecture:</b> Modular RAG Pipeline<br><br>
+
+        1. PDF Upload → Text Extraction  
+        2. Chunking → Embedding Generation  
+        3. Vector Storage (FAISS)  
+        4. Semantic Retrieval  
+        5. Gemini LLM Response Generation  
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.divider()
+
+    # ---------------- FOOTER ----------------
+    st.markdown(
+        """
+        <div style="text-align:center; color:gray; padding:10px;">
+            Built with Streamlit • Powered by Gemini AI • RAG Architecture
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
 
 # Conditional rendering of pages
