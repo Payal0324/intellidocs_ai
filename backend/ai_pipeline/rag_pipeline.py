@@ -43,29 +43,38 @@ class RAGPipeline:
         return "\n\n".join(prompt_parts)
 
     def generate_answer(self, query: str, retrieved_chunks: list, chat_history: list = None) -> dict:
+
         prompt_text = self._build_prompt(query, retrieved_chunks, chat_history)
 
+        citations = []
+        citation_pattern = re.compile(r'\(Doc: ([A-Za-z0-9_]+), Page: (\d+)\)')
+
         try:
-            model = genai.GenerativeModel('gemini-pro')
+            model = genai.GenerativeModel('gemini-1.5-flash')
             response = model.generate_content(prompt_text)
 
             ai_answer = response.text
 
-            citations = []
-            citation_pattern = re.compile(r'\(Doc: ([A-Za-z0-9_]+), Page: (\d+)\)')
             found_citations = citation_pattern.findall(ai_answer)
 
             for doc_id, page_num in found_citations:
-                citations.append({'document_id': doc_id, 'page_number': int(page_num)})
+                citations.append({
+                    'document_id': doc_id,
+                    'page_number': int(page_num)
+                })
 
-            return {'answer': ai_answer, 'citations': citations}
+            return {
+                'answer': ai_answer,
+                'citations': citations
+            }
 
         except Exception as e:
             print(f"Error generating content from Gemini: {e}")
-            ai_answer = "An error occurred while generating the answer."
-            if hasattr(e, 'text'):
-                ai_answer = e.text
-                found_citations = citation_pattern.findall(ai_answer)
-                for doc_id, page_num in found_citations:
-                    citations.append({'document_id': doc_id, 'page_number': int(page_num)})
-            return {'answer': ai_answer, 'citations': citations, 'error': str(e)}
+
+            ai_answer = f"Error generating answer: {str(e)}"
+
+            return {
+                'answer': ai_answer,
+                'citations': [],
+                'error': str(e)
+            }
