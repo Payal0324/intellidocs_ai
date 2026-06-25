@@ -11,10 +11,13 @@ class RAGPipeline:
     def __init__(self):
         self.gemini_api_key = st.secrets["GOOGLE_API_KEY"]
         genai.configure(api_key=self.gemini_api_key)
-        
-        print("AVAILABLE MODELS:")
-        for m in genai.list_models():
-            print(m.name)
+
+        try:
+            print("AVAILABLE MODELS:")
+            for m in genai.list_models():
+                print(m.name)
+        except Exception as e:
+            print("ERROR:", e)
 
     def _build_prompt(self, query: str, retrieved_chunks: list, chat_history: list = None) -> str:
         prompt_parts = [
@@ -54,7 +57,7 @@ class RAGPipeline:
         citation_pattern = re.compile(r'\(Doc: ([A-Za-z0-9_]+), Page: (\d+)\)')
 
         try:
-            model = genai.GenerativeModel('gemini-1.5-flash-latest')
+            model = genai.GenerativeModel('gemini-pro')
             response = model.generate_content(prompt_text)
 
             ai_answer = response.text
