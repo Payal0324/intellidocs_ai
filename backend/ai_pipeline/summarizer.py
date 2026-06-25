@@ -8,7 +8,7 @@ class Summarizer:
         self.gemini_api_key = st.secrets["GOOGLE_API_KEY"]
 
         genai.configure(api_key=self.gemini_api_key)
-        self.model = genai.GenerativeModel(model_name)
+        self.model = genai.GenerativeModel(model_name='gemini-pro')
 
     def summarize_text(self, text: str, max_words: int = 200) -> str:
         if not text.strip():
