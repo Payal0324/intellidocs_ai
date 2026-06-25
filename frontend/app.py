@@ -1042,6 +1042,115 @@ def show_about_project():
         unsafe_allow_html=True
     )
 
+def show_chat_with_pdfs():
+    st.markdown("## 💬 Chat with your Documents")
+    st.caption("Ask questions from your PDFs. Answers are generated using RAG + citations.")
+
+    # ----------------------------
+    # SESSION INIT
+    # ----------------------------
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+
+    if "session_id" not in st.session_state:
+        st.session_state.session_id = str(uuid.uuid4())
+        db_manager.create_user_session(st.session_state.session_id)
+
+    # ----------------------------
+    # CLEAR CHAT BUTTON (FIXED)
+    # ----------------------------
+    col1, col2 = st.columns([6, 1])
+    with col2:
+        if st.button("🗑️ Clear Chat"):
+            st.session_state.messages = []
+            st.rerun()
+
+    st.markdown("---")
+
+    # ----------------------------
+    # CHAT HISTORY DISPLAY
+    # ----------------------------
+    chat_container = st.container()
+
+    with chat_container:
+        for msg in st.session_state.messages:
+            role = msg["role"]
+
+            with st.chat_message(role):
+                st.markdown(msg["content"])
+
+                if role == "assistant" and msg.get("citations"):
+                    st.caption("📚 Sources:")
+                    for c in msg["citations"]:
+                        st.write(f"Doc {c['document_id']} • Page {c['page_number']}")
+
+    # ----------------------------
+    # CHAT INPUT (CHATGPT STYLE)
+    # ----------------------------
+    user_query = st.chat_input("Ask anything from your PDFs...")
+
+    if user_query:
+        # show user message
+        st.session_state.messages.append({
+            "role": "user",
+            "content": user_query
+        })
+
+        with st.chat_message("user"):
+            st.markdown(user_query)
+
+        # ----------------------------
+        # AI RESPONSE GENERATION
+        # ----------------------------
+        with st.chat_message("assistant"):
+            with st.spinner("Thinking..."):
+                query_embedding = embedding_generator.generate_query_embedding(user_query)
+                retrieved_chunks = vector_store_manager.search_similar(query_embedding)
+
+                chat_history_for_rag = [
+                    {"question": m["content"], "answer": ""}
+                    for m in st.session_state.messages[:-1]
+                    if m["role"] == "user"
+                ]
+
+                response = rag_pipeline.generate_answer(
+                    user_query,
+                    retrieved_chunks,
+                    chat_history_for_rag
+                )
+
+                answer = response.get("answer", "No response generated.")
+                citations = response.get("citations", [])
+
+                st.markdown(answer)
+
+                if citations:
+                    st.caption("📚 Sources")
+                    for c in citations:
+                        st.write(f"Doc {c['document_id']} • Page {c['page_number']}")
+
+        # save assistant message
+        st.session_state.messages.append({
+            "role": "assistant",
+            "content": answer,
+            "citations": citations
+        })
+
+        # DB save
+        linked_doc = None
+        if retrieved_chunks:
+            linked_doc = retrieved_chunks[0].get("document_id")
+
+        db_manager.save_chat_entry(
+            session_id=st.session_state.session_id,
+            question=user_query,
+            answer=answer,
+            citations=str(citations),
+            document_id=linked_doc
+        )
+
+        db_manager.update_session_activity(st.session_state.session_id)
+
 
 # Conditional rendering of pages
 if st.session_state.current_page == "Dashboard":
