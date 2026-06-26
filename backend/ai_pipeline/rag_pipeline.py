@@ -12,6 +12,8 @@ class RAGPipeline:
         self.gemini_api_key = st.secrets["GOOGLE_API_KEY"]
         genai.configure(api_key=self.gemini_api_key)
 
+        self.model = genai.GenerativeModel("gemini-2.5-flash")
+
         try:
             print("AVAILABLE MODELS:")
             for m in genai.list_models():
@@ -57,7 +59,6 @@ class RAGPipeline:
         citation_pattern = re.compile(r'\(Doc: ([A-Za-z0-9_]+), Page: (\d+)\)')
 
         try:
-            model = genai.GenerativeModel('gemini-2.5-flash')
             response = self.model.generate_content(prompt_text)
 
             ai_answer = response.text
