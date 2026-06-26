@@ -631,10 +631,10 @@ def show_document_summary():
         return
 
     # ---------------- AI SUMMARY ----------------
-    try:
-        if "summary_cache" not in st.session_state:
+    
+    if "summary_cache" not in st.session_state:
             st.session_state.summary_cache = {}
-
+    try:
         if selected_doc_id not in st.session_state.summary_cache:
             st.session_state.summary_cache[selected_doc_id] = summarizer.summarize_text(full_text)
 
@@ -710,6 +710,8 @@ def show_document_summary():
             st.rerun()
 
         if st.button("📄 Re-generate Summary"):
+            if "summary_cache" in st.session_state:
+                st.session_state.summary_cache.pop(selected_doc_id, None)
             st.rerun()
 
         if st.button("🗑️ Delete Document"):
@@ -1014,7 +1016,7 @@ def show_chat_with_pdfs():
 
                 chat_history_for_rag = [
                     {"question": m["content"], "answer": ""}
-                    for m in st.session_state.messages[:-1]
+                    for m in st.session_state.messages[-6:]
                     if m["role"] == "user"
                 ]
 
