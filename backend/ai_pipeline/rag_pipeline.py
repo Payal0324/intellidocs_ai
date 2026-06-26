@@ -7,19 +7,16 @@ import streamlit as st
 api_key = st.secrets["GOOGLE_API_KEY"]
 genai.configure(api_key=api_key)
 
+@st.cache_resource
+def get_gemini_model():
+    return genai.GenerativeModel("gemini-2.5-flash")
+
 class RAGPipeline:
     def __init__(self):
         self.gemini_api_key = st.secrets["GOOGLE_API_KEY"]
         genai.configure(api_key=self.gemini_api_key)
 
-        self.model = genai.GenerativeModel("gemini-2.5-flash")
-
-        try:
-            print("AVAILABLE MODELS:")
-            for m in genai.list_models():
-                print(m.name)
-        except Exception as e:
-            print("ERROR:", e)
+        self.model = get_gemini_model()
 
     def _build_prompt(self, query: str, retrieved_chunks: list, chat_history: list = None) -> str:
         prompt_parts = [
