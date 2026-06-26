@@ -632,7 +632,14 @@ def show_document_summary():
 
     # ---------------- AI SUMMARY ----------------
     try:
-        summary = summarizer.summarize_text(full_text)
+        if "summary_cache" not in st.session_state:
+            st.session_state.summary_cache = {}
+
+        if selected_doc_id not in st.session_state.summary_cache:
+            st.session_state.summary_cache[selected_doc_id] = summarizer.summarize_text(full_text)
+
+        summary = st.session_state.summary_cache[selected_doc_id]
+        
     except Exception as e:
         st.error("Failed to generate summary")
         st.exception(e)
