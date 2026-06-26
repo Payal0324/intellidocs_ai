@@ -356,117 +356,6 @@ def show_dashboard():
     # =========================
     st.success("System Status: Ready for Document Intelligence 🚀")
 
-def show_uploaded_documents(): # Renamed function
-    st.subheader("Upload and Manage Documents")
-    st.write("Upload your PDF files here to make them searchable and chat-ready.")
-
-    uploaded_files = st.file_uploader(
-        "Drag and drop PDF files here or click to browse",
-        type=["pdf"],
-        accept_multiple_files=True,
-        help="Only PDF files are supported."
-    )
-
-    if uploaded_files:
-        for uploaded_file in uploaded_files:
-            if uploaded_file.type == "application/pdf":
-                file_name = uploaded_file.name
-                document_uuid = str(uuid.uuid4())
-                temp_file_path = os.path.join("data", "uploaded_pdfs", f"{document_uuid}_{file_name}")
-
-                # Save the file to a temporary location
-                os.makedirs(os.path.dirname(temp_file_path), exist_ok=True)
-                with open(temp_file_path, "wb") as f:
-                    f.write(uploaded_file.getbuffer())
-
-                progress_text = st.empty()
-                progress_text.info(f"Processing '{file_name}'...")
-
-                try:
-                    # 1. Add document metadata to DB
-                    new_doc = db_manager.add_document(
-                        filename=file_name,
-                        status='processing',
-                        file_path=temp_file_path
-                    )
-                    document_id = new_doc.document_id
-
-                    # 2. Extract text from PDF
-                    extracted_data = pdf_processor.extract_text_from_pdf(temp_file_path)
-                    # Count total pages
-                    num_pages = len(extracted_data)
-                    progress_text.success(f"Extracted text from {num_pages} pages of '{file_name}'.")
-
-                    # 3. Generate embeddings
-                    embeddings_with_metadata = embedding_generator.generate_embeddings_for_document_pages(
-                        extracted_data, str(document_id) # Convert doc_id to string for metadata consistency
-                    )
-                    progress_text.success(f"Generated {len(embeddings_with_metadata)} embeddings for '{file_name}'.")
-
-                    # 4. Add embeddings to vector store
-                    vector_store_manager.add_embeddings(embeddings_with_metadata)
-                    progress_text.success(f"Embeddings added to vector store for '{file_name}'.")
-
-                    # 5. Add chunks to database for source citation and explicit lookup
-                    for chunk_item in embeddings_with_metadata:
-                        db_manager.add_chunk(
-                            document_id=document_id,
-                            text_content=chunk_item['content'],
-                            page_number=chunk_item['page_number']
-                        )
-                    progress_text.success(f"Chunks saved to database for '{file_name}'.")
-
-                    # 6. Update document status and number of pages in DB
-                    db_manager.update_document_status(document_id, 'completed', num_pages=num_pages)
-                    progress_text.success(f"Successfully processed and indexed '{file_name}'.")
-
-                except Exception as e:
-                    error_message = f"Error processing '{file_name}': {e}"
-                    progress_text.error(error_message)
-                    st.exception(e)
-                    if 'document_id' in locals():
-                        db_manager.update_document_status(document_id, 'failed')
-                finally:
-                    # Clean up temporary file (optional, depending on storage strategy)
-                    # os.remove(temp_file_path)
-                    st.rerun() # Rerun to update document list
-
-            else:
-                st.error(f"Skipping {uploaded_file.name}: Only PDF files are allowed.")
-
-    st.markdown("### Your Uploaded Documents")
-
-    documents = db_manager.get_all_documents()
-
-    if not documents:
-        st.info("No documents uploaded yet. Upload PDFs above to see them listed here.")
-    else:
-        # Display documents in a grid
-        cols = st.columns(3) # Adjust number of columns as needed
-        for i, doc in enumerate(documents):
-            with cols[i % 3]:
-                with st.container(border=True):
-                    st.markdown(f"**{doc.filename}**")
-                    st.write(f"Status: {doc.status}")
-                    st.write(f"Uploaded: {doc.upload_date.strftime('%Y-%m-%d %H:%M')}")
-                    if hasattr(doc, 'num_pages') and doc.num_pages is not None:
-                        st.write(f"Pages: {doc.num_pages}")
-                    else:
-                         # Handle cases where num_pages might not be set or is None
-                        st.write("Pages: N/A")
-
-                    col_btns1, col_btns2 = st.columns(2)
-                    with col_btns1:
-                        if st.button("View Summary", key=f"summary_doc_{doc.document_id}"):
-                            st.session_state.current_page = "Document Summary"
-                            st.session_state.selected_document_id = doc.document_id # Store selected doc ID
-                            st.rerun()
-                    with col_btns2:
-                        if st.button("Delete", key=f"delete_doc_{doc.document_id}"):
-                            db_manager.delete_document(doc.document_id)
-                            st.success(f"Document '{doc.filename}' deleted.")
-                            st.rerun()
-
 def show_uploaded_documents():
     st.markdown("## 📂 Document Library")
     st.caption("Upload, manage, and view all your documents in one place")
@@ -482,10 +371,19 @@ def show_uploaded_documents():
             label_visibility="collapsed"
         )
 
+        documents = db_manager.get_all_documents()
+        existing_files = {doc.filename for doc in documents}
+    
+        processed_any = False
         if uploaded_files:
             for uploaded_file in uploaded_files:
 
                 file_name = uploaded_file.name
+
+                if file_name in existing_files:
+                    st.warning(f"{file_name} already exists. Skipping.")
+                    continue
+
                 document_uuid = str(uuid.uuid4())
                 temp_file_path = os.path.join(
                     "data", "uploaded_pdfs",
@@ -542,20 +440,20 @@ def show_uploaded_documents():
                     progress.progress(100)
 
                     status_text.success(f"✅ {file_name} processed successfully!")
+                    processed_any = True
 
                 except Exception as e:
                     status_text.error(f"❌ Error: {file_name}")
                     db_manager.update_document_status(document_id, 'failed')
                     st.exception(e)
 
-                st.rerun()
+        if processed_any:
+            st.rerun()
 
     st.divider()
 
     # ---------------- DOCUMENT LIST ----------------
     st.markdown("### 📄 Your Documents")
-
-    documents = db_manager.get_all_documents()
 
     if not documents:
         st.info("No documents uploaded yet.")
