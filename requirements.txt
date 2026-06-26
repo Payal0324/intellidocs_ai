@@ -6,7 +6,7 @@ pymupdf
 sentence-transformers
 faiss-cpu
 python-dotenv
-google-generativeai
+google-generativeai==0.8.5
 langchain-text-splitters
 SQLAlchemy
 torch
