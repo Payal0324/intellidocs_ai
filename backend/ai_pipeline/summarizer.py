@@ -3,12 +3,16 @@ import google.generativeai as genai
 import re
 import streamlit as st
 
+@st.cache_resource
+def get_gemini_model():
+    return genai.GenerativeModel("gemini-2.5-flash")
+
 class Summarizer:
     def __init__(self, model_name: str = 'gemini-2.5-flash'):
         self.gemini_api_key = st.secrets["GOOGLE_API_KEY"]
 
         genai.configure(api_key=self.gemini_api_key)
-        self.model = genai.GenerativeModel(model_name='gemini-2.5-flash')
+        self.model = get_gemini_model()
 
     def summarize_text(self, text: str, max_words: int = 200) -> str:
         if not text.strip():
