@@ -291,10 +291,6 @@ with st.sidebar:
     st.markdown("### ℹ️ About")
     st.caption("Upload PDFs → Ask Questions → Get AI Answers with Citations")
 
-    st.markdown("---")
-
-    st.caption("Made with ❤️ using Streamlit + LLM + RAG")
-
 # Function for Dashboard
 def show_dashboard():
 
@@ -525,7 +521,7 @@ def show_uploaded_documents():
                     st.rerun()
                     
 def show_chat_history():
-    st.subheader("💬 Chat History")
+    st.markdown("##💬 Chat History")
     st.caption("Review and manage all your past conversations.")
 
     # Ensure session exists
