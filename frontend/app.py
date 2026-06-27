@@ -521,7 +521,7 @@ def show_uploaded_documents():
                     st.rerun()
                     
 def show_chat_history():
-    st.markdown("##💬 Chat History")
+    st.markdown("## 💬 Chat History")
     st.caption("Review and manage all your past conversations.")
 
     # Ensure session exists
