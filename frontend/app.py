@@ -363,7 +363,7 @@ def show_dashboard():
             st.rerun()
 
     with colB:
-        if st.button("💬 Chat with PDFs", use_container_width=True):
+        if st.button("💬 Start Chat", use_container_width=True):
             st.session_state.current_page = "Chat with PDFs"
             st.rerun()
 
