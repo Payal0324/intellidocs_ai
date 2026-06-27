@@ -544,6 +544,10 @@ def show_chat_history():
         with st.container():
             st.markdown("")
 
+            # DEBUG 
+            st.write("Question:", repr(entry.question))
+            st.write("Answer:", repr(entry.answer))
+            
             # Card UI
             st.markdown(
                 f"""
