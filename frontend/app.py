@@ -298,6 +298,8 @@ def show_dashboard():
 
     st.caption("AI-powered document intelligence platform for chatting, summarizing and managing PDF documents.")
 
+    st.markdown("---")
+    
     # =========================
     # REAL METRICS (DYNAMIC)
     # =========================
@@ -341,6 +343,8 @@ def show_dashboard():
             help="Saved conversations"
         )
 
+    st.markdown("---")
+    
     # =========================
     # QUICK ACTIONS (CLEAN UI)
     # =========================
