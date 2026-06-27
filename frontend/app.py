@@ -540,39 +540,51 @@ def show_chat_history():
     st.markdown("---")
 
     # CHAT STYLE DISPLAY
-    for entry in reversed(filtered_history):  # latest first
+    st.markdown("### 💬 Conversation History")
+
+    for entry in reversed(filtered_history):
+
         with st.container():
-            st.markdown("")
-            
-            # Card UI
+                
+            # TOP CARD (CHAT MESSAGE)
             with st.container(border=True):
-                st.caption(f"🕒 {entry.timestamp.strftime('%Y-%m-%d %H:%M')}")
 
-                st.markdown(f"**🧑 You:** {entry.question}")
+            # Header row (timestamp + delete button)
+                col1, col2 = st.columns([6, 1])
 
-                st.markdown(f"**🤖 AI:** {entry.answer}")
+                with col1:
+                    st.caption(f"🕒 {entry.timestamp.strftime('%Y-%m-%d %H:%M')}")
 
-            # Buttons row
-            c1, c2 = st.columns([1, 6])
+                with col2:
+                    if st.button("🗑️", key=f"del_{entry.chat_id}"):
+                        db_manager.delete_chat_entry(entry.chat_id)
+                        st.rerun()
 
-            with c1:
-                if st.button("🗑️ Delete", key=f"del_{entry.chat_id}"):
-                    db_manager.delete_chat_entry(entry.chat_id)
-                    st.success("Deleted")
-                    st.rerun()
+                st.markdown("")
 
-            with c2:
+                # USER MESSAGE
+                st.markdown("#### 🧑 You")
+                st.write(entry.question)
+
+                st.markdown("---")
+
+                # AI RESPONSE
+                st.markdown("#### 🤖 Assistant")
+                st.write(entry.answer)
+
+                # CITATIONS (if any)
                 if entry.citations:
                     try:
                         citation_list = json.loads(entry.citations)
+
                         if citation_list:
-                            st.caption(
-                                "📌 Sources: " +
-                                ", ".join(
-                                    [f"Doc {c['document_id']} (Pg {c['page_number']})"
-                                     for c in citation_list]
+                            st.markdown("**📚 Sources:**")
+
+                            for c in citation_list:
+                                st.caption(
+                                    f"📄 Document {c['document_id']} | Page {c['page_number']}"
                                 )
-                            )
+
                     except:
                         pass
 
