@@ -204,6 +204,34 @@ hr{
     border:1px solid #3B82F6;
 }
 
+/* =========================
+   BIGGER DASHBOARD METRICS
+========================= */
+
+[data-testid="metric-container"] {
+    padding: 24px 20px !important;
+    border-radius: 16px;
+}
+
+/* Metric label (📄 Documents etc.) */
+[data-testid="metric-container"] label {
+    font-size: 18px !important;
+    font-weight: 600;
+}
+
+/* Metric value (1, 9, 0) */
+[data-testid="metric-container"] [data-testid="stMetricValue"] {
+    font-size: 34px !important;
+    font-weight: 700;
+}
+
+/* Metric delta/help text */
+[data-testid="metric-container"] [data-testid="stMetricDelta"],
+[data-testid="metric-container"] [data-testid="stMetricLabel"] {
+    font-size: 13px !important;
+    color: #9CA3AF;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -351,7 +379,7 @@ def show_dashboard():
     st.subheader("⚡Quick Actions")
     st.caption("Choose what you'd like to do.")
 
-    colA, colB, colC = st.columns(3)
+    colA, colB, colC = st.columns(3, gap="large")
 
     with colA:
         if st.button("📤 Upload Documents", use_container_width=True):
