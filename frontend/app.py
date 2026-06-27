@@ -313,8 +313,6 @@ with st.sidebar:
     except:
         st.metric("Total Documents", "0")
 
-    st.markdown("---")
-
     # About Section
     st.markdown("### ℹ️ About")
     st.caption("Upload PDFs → Ask Questions → Get AI Answers with Citations")
