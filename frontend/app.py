@@ -241,10 +241,6 @@ summarizer = get_summarizer() # Get the summarizer instance
 
 
 # Header Section
-st.markdown("## 🧠 IntelliDocs AI")
-st.caption("Intelligent Multi-PDF Conversational Knowledge Assistant using RAG")
-
-st.markdown("---")
 
 # Initialize session state for navigation
 if 'current_page' not in st.session_state:
@@ -352,7 +348,7 @@ def show_dashboard():
     # =========================
     # QUICK ACTIONS (CLEAN UI)
     # =========================
-    st.subheader("Quick Actions")
+    st.subheader("⚡Quick Actions")
     st.caption("Choose what you'd like to do.")
 
     colA, colB, colC = st.columns(3)
