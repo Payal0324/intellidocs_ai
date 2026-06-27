@@ -543,37 +543,14 @@ def show_chat_history():
     for entry in reversed(filtered_history):  # latest first
         with st.container():
             st.markdown("")
-
-            # DEBUG 
-            st.write("Question:", repr(entry.question))
-            st.write("Answer:", repr(entry.answer))
             
             # Card UI
-            st.markdown(
-                f"""
-                <div style="
-                    background: #ffffff;
-                    border: 1px solid #e6e6e6;
-                    border-radius: 12px;
-                    padding: 15px 18px;
-                    margin-bottom: 12px;
-                    box-shadow: 0px 2px 8px rgba(0,0,0,0.05);
-                ">
-                    <div style="font-size:14px; color:#888;">
-                        🕒 {entry.timestamp.strftime('%Y-%m-%d %H:%M')}
-                    </div>
+            with st.container(border=True):
+                st.caption(f"🕒 {entry.timestamp.strftime('%Y-%m-%d %H:%M')}")
 
-                    <div style="margin-top:8px; font-weight:600; color:#333;">
-                        🧑 You: {entry.question}
-                    </div>
+                st.markdown(f"**🧑 You:** {entry.question}")
 
-                    <div style="margin-top:10px; color:#444; line-height:1.5;">
-                        🤖 AI: {entry.answer[:300]}...
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+                st.markdown(f"**🤖 AI:** {entry.answer}")
 
             # Buttons row
             c1, c2 = st.columns([1, 6])
