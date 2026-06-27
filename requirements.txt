@@ -1,7 +1,7 @@
 
 fastapi
 uvicorn
-streamlit
+streamlit==1.45.1
 pymupdf
 sentence-transformers
 faiss-cpu
