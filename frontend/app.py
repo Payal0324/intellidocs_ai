@@ -176,6 +176,34 @@ div[data-testid="stVerticalBlock"] > div:has(div.stContainer) {
     background: #475569;
 }
 
+/* Dashboard spacing */
+.block-container{
+    padding-top:1.5rem;
+    padding-bottom:2rem;
+}
+
+/* Remove horizontal line spacing */
+hr{
+    margin:0.3rem 0 1rem 0;
+}
+
+/* Buttons full width */
+.stButton > button{
+    width:100%;
+    height:50px;
+    font-size:15px;
+}
+
+/* Better metric hover */
+[data-testid="metric-container"]{
+    transition:0.2s ease;
+}
+
+[data-testid="metric-container"]:hover{
+    transform:translateY(-3px);
+    border:1px solid #3B82F6;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -274,10 +302,9 @@ with st.sidebar:
 # Function for Dashboard
 def show_dashboard():
 
-    st.markdown("## 🧠 Welcome to IntelliDocs AI")
-    st.caption("Transform your PDFs into an intelligent conversational knowledge base")
+    st.title("🧠 IntelliDocs AI")
 
-    st.markdown("---")
+    st.caption("AI-powered document intelligence platform for chatting, summarizing and managing PDF documents.")
 
     # =========================
     # REAL METRICS (DYNAMIC)
@@ -302,35 +329,46 @@ def show_dashboard():
         total_chats = 0
 
     with col1:
-        st.metric("📄 Documents", total_docs)
+        st.metric(
+            label="📄 Documents",
+            value=total_docs,
+            help="Uploaded PDF files"
+        )
 
     with col2:
-        st.metric("📑 Pages Processed", total_pages)
+        st.metric(
+            label="📑 Pages",
+            value=total_pages,
+            help="Total processed pages"
+        )
 
     with col3:
-        st.metric("💬 Conversations", total_chats)
-
-    st.markdown("---")
+        st.metric(
+            label="💬 Chats",
+            value=total_chats,
+            help="Saved conversations"
+        )
 
     # =========================
     # QUICK ACTIONS (CLEAN UI)
     # =========================
-    st.markdown("### ⚡ Quick Actions")
+    st.subheader("Quick Actions")
+    st.caption("Choose what you'd like to do.")
 
     colA, colB, colC = st.columns(3)
 
     with colA:
-        if st.button("📤 Upload PDF", use_container_width=True):
+        if st.button("📤 Upload Documents", use_container_width=True):
             st.session_state.current_page = "Uploaded Documents"
             st.rerun()
 
     with colB:
-        if st.button("💬 Start Chat", use_container_width=True):
+        if st.button("💬 Chat with PDFs", use_container_width=True):
             st.session_state.current_page = "Chat with PDFs"
             st.rerun()
 
     with colC:
-        if st.button("📂 View Documents", use_container_width=True):
+        if st.button("📂 Manage Documents", use_container_width=True):
             st.session_state.current_page = "Uploaded Documents"
             st.rerun()
 
@@ -339,22 +377,17 @@ def show_dashboard():
     # =========================
     # ACTIVITY SNAPSHOT (NEW IDEA)
     # =========================
-    st.markdown("### 📊 System Snapshot")
+    st.subheader("Recent Documents")
 
-    colx, coly = st.columns(2)
-
-    with colx:
-        st.info("📌 Upload PDFs → System creates embeddings → Stores in FAISS")
-
-    with coly:
-        st.info("🤖 Ask questions → RAG retrieves context → Gemini generates answer")
-
-    st.markdown("---")
-
-    # =========================
-    # CLEAN FOOTER STYLE
-    # =========================
-    st.success("System Status: Ready for Document Intelligence 🚀")
+    if documents:
+        for doc in documents[:5]:
+            st.markdown(
+                f"📄 **{doc.filename}**  \n"
+                f"<span style='color:#94A3B8;'>Pages: {doc.num_pages}</span>",
+                unsafe_allow_html=True
+            )
+    else:
+        st.info("No documents uploaded yet.")
 
 def show_uploaded_documents():
     st.markdown("## 📂 Document Library")
