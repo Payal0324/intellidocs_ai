@@ -313,6 +313,8 @@ with st.sidebar:
     except:
         st.metric("Total Documents", "0")
 
+    st.markdown("---")
+    
     # About Section
     st.markdown("### ℹ️ About")
     st.caption("Upload PDFs → Ask Questions → Get AI Answers with Citations")
@@ -415,6 +417,8 @@ def show_uploaded_documents():
     st.markdown("## 📂 Document Library")
     st.caption("Upload, manage, and view all your documents in one place")
 
+    st.markdown("---")
+    
     # ---------------- UPLOAD SECTION ----------------
     with st.container():
         st.markdown("### ⬆️ Upload Documents")
