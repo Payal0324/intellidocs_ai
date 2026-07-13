@@ -10,6 +10,8 @@ Instead of manually searching through long documents, users can ask questions an
 
 The system transforms static PDFs into a **smart conversational knowledge assistant** similar to ChatGPT, but grounded only on user-provided documents.
 
+Explore live app: https://intellidocsai-mzkjrymefhhq5zje858ujy.streamlit.app/
+
 ---
 
 ## 📁 Project Structure
